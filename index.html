@@ -511,25 +511,25 @@ window.DASHBOARD_CSV = "\"ГАК НВ: данные по месяцам, кам�
     let expandedCampaignMonths = new Set();
     let chartHandlers = [];
 
-    fetch(csvUrl)
-      .then((response) => {
-        if (!response.ok) throw new Error('CSV недоступен');
-        return response.text();
-      })
-      .then((text) => {
-        months = normalize(parseCsv(text));
-        selected = new Set(months.slice(-6).map((month) => month.key));
-        render();
-      })
-      .catch((error) => {
-        if (window.DASHBOARD_CSV) {
-          months = normalize(parseCsv(window.DASHBOARD_CSV));
+    if (window.DASHBOARD_CSV) {
+      months = normalize(parseCsv(window.DASHBOARD_CSV));
+      selected = new Set(months.slice(-6).map((month) => month.key));
+      render();
+    } else {
+      fetch(csvUrl)
+        .then((response) => {
+          if (!response.ok) throw new Error('CSV недоступен');
+          return response.text();
+        })
+        .then((text) => {
+          months = normalize(parseCsv(text));
           selected = new Set(months.slice(-6).map((month) => month.key));
           render();
-          return;
-        }
-        app.innerHTML = `<div class="loading">Не удалось загрузить данные. Рядом с index.html должен быть sheet.csv или data.js. ${error.message}</div>`;
-      });
+        })
+        .catch((error) => {
+          app.innerHTML = `<div class="loading">Не удалось загрузить данные. Рядом с index.html должен быть sheet.csv или data.js. ${error.message}</div>`;
+        });
+    }
 
     function parseCsv(text) {
       const rows = [];
